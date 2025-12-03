@@ -77,8 +77,8 @@ So we create a secret like this
 
 kubectl create secret docker-registry regcred \
   --docker-server=https://index.docker.io/v1/ \
-  --docker-username="jashwanth112002" \
-  --docker-password="Jaswanth@112002" \
+  --docker-username="<usernmae>" \
+  --docker-password="<paswd>" \
   --namespace=webapps
 
 # in settings.xml
