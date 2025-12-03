@@ -81,6 +81,12 @@ pipeline {
 
             }
         }   
-            
+
+
     }
+post {
+v hav to write email outside stages and inside pipline
 }
+
+}
+
