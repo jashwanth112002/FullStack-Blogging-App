@@ -1,0 +1,86 @@
+#pipleine script
+
+pipeline {
+    agent any
+    
+    stages {
+    
+   stage('git-checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/jashwanth112002/FullStack-Blogging-App.git'
+            }
+        }
+    
+        stage('mvn-compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        
+        stage('mvn test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        
+        stage('trivy') {
+            steps {
+                sh "trivy fs --format table -o fs.html ."
+            }
+        }
+        
+        stage('sonar-scanner') {
+            steps {
+                withSonarQubeEnv(installationName: 'sonarqube',credentialsId: 'sonar-cred') {
+                  sh 'mvn sonar:sonar'
+}
+            }
+        }
+        
+        stage('build') {
+            steps {
+               sh  'mvn clean package'
+            }
+        }
+        
+        stage('publish-nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3', traceability: true) {
+                sh 'mvn deploy'
+}
+            }
+        }
+        
+         stage('build image in docker') {
+            steps {
+                script{
+               withDockerRegistry(credentialsId: 'docker-cred') {
+                sh 'docker build -t myimg .'
+                
+}
+            }
+        }
+         }  
+        
+        
+         stage('scan trivy') {
+            steps {
+               sh "trivy image --format table -o index.html project-demo:latest"
+            }
+        }
+        
+        stage('build push image') {
+            steps {
+                script{
+               withDockerRegistry(credentialsId: 'docker-cred') {
+                 sh 'docker tag myimg jashwant112002/project-demo:latest'
+                sh 'docker push jashwanth112002/project-demo:latest'
+}
+                    
+                }
+
+            }
+        }   
+            
+    }
+}
